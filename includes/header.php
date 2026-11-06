@@ -1,0 +1,572 @@
+<?php
+/**
+ * Header Template for Pizza Lovers Club
+ * Based on CENY6103 Module 2 - PHP Templating with Includes
+ */
+
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Get current page filename for active nav indicator
+$current_page = basename($_SERVER['PHP_SELF']);
+
+// Define navigation items
+$nav_items = [
+    'Home' => 'index.php',
+    'Register' => 'register.php',
+    'Login' => 'login.php'
+];
+
+// Check if user is logged in
+$is_logged_in = isset($_SESSION['user_id']) && $_SESSION['logged_in'] === true;
+
+// If logged in, show different nav
+if ($is_logged_in) {
+    $nav_items = [
+        'Home' => 'index.php',
+        'Dashboard' => 'dashboard.php',
+        'Profile' => 'profile.php',
+        'Logout' => 'logout.php'
+    ];
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo $page_title ?? "Pizza Lovers Club - Registration"; ?></title>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <meta name="description" content="<?php echo $page_description ?? "Join the Pizza Lovers Club community!"; ?>">
+</head>
+<style>
+    /**
+    * Pizza Lovers Club - Registration System
+    * Modern Minimalist Design with Warm Terracotta Palette
+    * Design: Warm Minimalism, Clean Typography, Functional Simplicity
+    */
+
+    :root {
+    /* Color Palette */
+    --primary: #d97706;        /* Warm terracotta */
+    --primary-dark: #b45309;   /* Darker terracotta */
+    --secondary: #15803d;      /* Forest green */
+    --accent: #fbbf24;         /* Soft gold */
+    --background: #fffbf0;     /* Cream */
+    --surface: #ffffff;        /* White */
+    --text-primary: #1f2937;   /* Slate gray */
+    --text-secondary: #6b7280; /* Light gray */
+    --border: #e5e7eb;         /* Light border */
+    --error: #dc2626;          /* Red */
+    --success: #16a34a;        /* Green */
+    --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08);
+
+    /* Typography */
+    --font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-size-base: 16px;
+    --font-size-sm: 14px;
+    --font-size-lg: 18px;
+    --font-size-xl: 24px;
+    --font-size-2xl: 32px;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    --spacing-2xl: 48px;
+
+    /* Radius */
+    --radius: 12px;
+    --radius-sm: 8px;
+
+    /* Transitions */
+    --transition: all 200ms ease-in-out;
+    }
+
+    /* Reset & Base Styles */
+    * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    }
+
+    html {
+    font-size: var(--font-size-base);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+    font-family: var(--font-family);
+    background-color: var(--background);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4, h5, h6 {
+    font-weight: var(--font-weight-bold);
+    line-height: 1.2;
+    margin-bottom: var(--spacing-md);
+    }
+
+    h1 {
+    font-size: var(--font-size-2xl);
+    }
+
+    h2 {
+    font-size: var(--font-size-xl);
+    }
+
+    h3 {
+    font-size: var(--font-size-lg);
+    }
+
+    p {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-secondary);
+    }
+
+    a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition);
+    }
+
+    a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+    }
+
+    /* Container */
+    .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    }
+
+    /* Header Navigation */
+    header {
+    background-color: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: var(--spacing-lg) 0;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    }
+
+    .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+    }
+
+    .logo {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    }
+
+    .logo::before {
+    content: "🍕";
+    font-size: 28px;
+    }
+
+    nav {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: center;
+    }
+
+    nav a {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-medium);
+    transition: var(--transition);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-sm);
+    }
+
+    nav a:hover,
+    nav a.active {
+    background-color: var(--background);
+    color: var(--primary);
+    text-decoration: none;
+    }
+
+    /* Main Content */
+    main {
+    padding: var(--spacing-2xl) 0;
+    min-height: calc(100vh - 200px);
+    }
+
+    /* Card Component */
+    .card {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    }
+
+    .card:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+    }
+
+    /* Form Styles */
+    .form-group {
+    margin-bottom: var(--spacing-lg);
+    }
+
+    label {
+    display: block;
+    margin-bottom: var(--spacing-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="tel"],
+    textarea {
+    width: 100%;
+    padding: var(--spacing-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    transition: var(--transition);
+    background-color: var(--surface);
+    color: var(--text-primary);
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="tel"]:focus,
+    textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.1);
+    }
+
+    input[type="text"].error,
+    input[type="email"].error,
+    input[type="password"].error,
+    input[type="tel"].error,
+    textarea.error {
+    border-color: var(--error);
+    background-color: rgba(220, 38, 38, 0.05);
+    }
+
+    textarea {
+    resize: vertical;
+    min-height: 100px;
+    }
+
+    /* Checkbox */
+    .checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    }
+
+    input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: var(--primary);
+    }
+
+    .checkbox-label {
+    margin: 0;
+    font-weight: var(--font-weight-normal);
+    cursor: pointer;
+    flex: 1;
+    }
+
+    /* Error Messages */
+    .error-message {
+    display: block;
+    color: var(--error);
+    font-size: var(--font-size-sm);
+    margin-top: var(--spacing-xs);
+    font-weight: var(--font-weight-medium);
+    }
+
+    .error-alert {
+    background-color: rgba(220, 38, 38, 0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    }
+
+    .error-alert::before {
+    content: "⚠️";
+    flex-shrink: 0;
+    }
+
+    /* Success Messages */
+    .success-alert {
+    background-color: rgba(22, 163, 74, 0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--spacing-lg);
+    display: flex;
+    gap: var(--spacing-md);
+    align-items: flex-start;
+    }
+
+    .success-alert::before {
+    content: "✓";
+    flex-shrink: 0;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    }
+
+    /* Button Styles */
+    button,
+    .btn {
+    display: inline-block;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    }
+
+    .btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    }
+
+    .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+    }
+
+    .btn-primary:active {
+    transform: translateY(0);
+    }
+
+    .btn-secondary {
+    background-color: var(--background);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+    background-color: var(--border);
+    }
+
+    .btn-success {
+    background-color: var(--success);
+    color: white;
+    }
+
+    .btn-success:hover {
+    opacity: 0.9;
+    }
+
+    .btn-block {
+    width: 100%;
+    }
+
+    /* Helper Text */
+    .helper-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-secondary);
+    margin-top: var(--spacing-xs);
+    }
+
+    /* Layout */
+    .form-container {
+    max-width: 500px;
+    margin: 0 auto;
+    }
+
+    .page-header {
+    text-align: center;
+    margin-bottom: var(--spacing-2xl);
+    }
+
+    .page-header h1 {
+    margin-bottom: var(--spacing-md);
+    }
+
+    .page-header p {
+    font-size: var(--font-size-lg);
+    color: var(--text-secondary);
+    }
+
+    /* Success Page */
+    .success-container {
+    text-align: center;
+    padding: var(--spacing-2xl) 0;
+    }
+
+    .success-icon {
+    font-size: 64px;
+    margin-bottom: var(--spacing-lg);
+    }
+
+    .success-container h2 {
+    color: var(--success);
+    margin-bottom: var(--spacing-md);
+    }
+
+    .user-info {
+    background-color: var(--background);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-sm);
+    margin: var(--spacing-lg) 0;
+    text-align: left;
+    }
+
+    .user-info p {
+    margin-bottom: var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    }
+
+    .user-info strong {
+    color: var(--text-primary);
+    }
+
+    /* Footer */
+    footer {
+    background-color: var(--text-primary);
+    color: white;
+    padding: var(--spacing-lg) 0;
+    text-align: center;
+    margin-top: var(--spacing-2xl);
+    }
+
+    footer p {
+    color: rgba(255, 255, 255, 0.8);
+    margin: 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+    .header-content {
+        flex-direction: column;
+        gap: var(--spacing-md);
+    }
+
+    nav {
+        flex-direction: column;
+        width: 100%;
+        gap: var(--spacing-md);
+    }
+
+    nav a {
+        width: 100%;
+        text-align: center;
+    }
+
+    h1 {
+        font-size: var(--font-size-xl);
+    }
+
+    .form-container {
+        padding: 0 var(--spacing-md);
+    }
+    }
+
+    /* Loading Spinner */
+    .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(217, 119, 6, 0.3);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+    }
+
+    /* Utility Classes */
+    .text-center {
+    text-align: center;
+    }
+
+    .mt-lg {
+    margin-top: var(--spacing-lg);
+    }
+
+    .mb-lg {
+    margin-bottom: var(--spacing-lg);
+    }
+
+    .hidden {
+    display: none;
+    }
+
+    .flex {
+    display: flex;
+    gap: var(--spacing-md);
+    }
+
+    .flex-center {
+    justify-content: center;
+    align-items: center;
+    }
+</style>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">Pizza Lovers Club</div>
+            <nav>
+                <?php foreach ($nav_items as $label => $url): ?>
+                    <a href="<?php echo $url; ?>" 
+                       class="<?php echo ($current_page == $url) ? 'active' : ''; ?>">
+                        <?php echo $label; ?>
+                    </a>
+                <?php endforeach; ?>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
